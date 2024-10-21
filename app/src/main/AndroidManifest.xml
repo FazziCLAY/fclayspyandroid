@@ -16,8 +16,9 @@
         android:theme="@style/Theme.FClaySpyTheme"
         tools:targetApi="31">
         <activity
-            android:name="com.fazziclay.fclayspyandroid.MainActivity"
+            android:name="com.fazziclay.fclayspyandroid.ui.activity.MainActivity"
             android:exported="true"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.FClaySpyTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +27,7 @@
         </activity>
 
         <activity
-            android:name="com.fazziclay.fclayspyandroid.ConfigActivity"
+            android:name="com.fazziclay.fclayspyandroid.ui.activity.ConfigActivity"
             android:exported="true"
             android:theme="@style/Theme.FClaySpyTheme">
         </activity>

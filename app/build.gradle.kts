@@ -50,7 +50,8 @@ android {
 }
 
 dependencies {
-    implementation(files("../libs/apiclient-1.0-SNAPSHOT.jar"))
+    implementation(files("../libs/apiclient-1.0.jar"))
+    implementation(files("../libs/api-1.0.jar"))
 
     //
     compileOnly("org.projectlombok:lombok:1.18.34")
@@ -59,6 +60,7 @@ dependencies {
     // retrofit
     implementation("com.squareup.retrofit2:retrofit:2.10.0")
     implementation("com.squareup.retrofit2:converter-gson:2.10.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.1.0")
     implementation("com.google.code.gson:gson:2.11.0")
 
 
