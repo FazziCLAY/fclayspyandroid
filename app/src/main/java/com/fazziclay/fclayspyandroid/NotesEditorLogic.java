@@ -27,11 +27,13 @@ public class NotesEditorLogic {
     private Runnable runnable;
     private Handler handler;
     private final Consumer<String> consumer;
+    private final Runnable tickRunnable;
     private boolean destroyed;
 
-    public NotesEditorLogic(App app, Consumer<String> consumer) {
+    public NotesEditorLogic(App app, Consumer<String> consumer, Runnable tickRunnable) {
         this.app = app;
         this.consumer = consumer;
+        this.tickRunnable = tickRunnable;
         this.runnable = () -> {
             interval();
             if (!destroyed) {
@@ -50,10 +52,12 @@ public class NotesEditorLogic {
 
     private void overwriteNoteArea(String text) {
         Log.d(TAG, "overwriteNoteArea text="+text);
-        syncFromServerAt = System.currentTimeMillis();
+        if (noteTypingLatestKeyup <= syncFromServerAt && !Objects.equals(textFromServer, text)) {
+            textBoxText = text;
+            consumer.accept(text);
+        }
         textFromServer = text;
-        consumer.accept(text);
-        textBoxText = text;
+        syncFromServerAt = System.currentTimeMillis();
     }
 
     public boolean serverEqual() {
@@ -69,6 +73,10 @@ public class NotesEditorLogic {
         if (noteTypingLatestKeyup <= syncFromServerAt) {
             Log.d(TAG, "typing =< sync");
             setNoteFromServer();
+        }
+
+        if (tickRunnable != null) {
+            tickRunnable.run();
         }
     }
 

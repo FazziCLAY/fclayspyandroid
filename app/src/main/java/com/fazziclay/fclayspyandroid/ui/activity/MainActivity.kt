@@ -39,21 +39,17 @@ import com.fazziclay.fclayspyandroid.NotesEditorLogic
 import com.fazziclay.fclayspyandroid.ui.theme.FClaySpyThemeTheme
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        private val COLOR_WARNING = Color(parseColor("#f59703"))
+    }
     private lateinit var app: App
     private var notesEditorLogic: NotesEditorLogic? = null
-    private var mutableNote = mutableStateOf("")
     private var textMutableStatus = mutableStateOf("?")
     private var textMutableStatusColor = mutableStateOf(Color.Red)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         app = App.getApp(this@MainActivity)
-
-        notesEditorLogic = NotesEditorLogic(app) {
-            mutableNote.value = it!!
-            updateStatus()
-        }
+        super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
         setContent {
@@ -61,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 .imePadding()
                 .safeContentPadding()) {
                 Content()
-                StateIndicator(modifier = Modifier
+                NotesStateIndicator(modifier = Modifier
                     .safeContentPadding()
                     .padding(end = 15.dp)
                     .align(alignment = Alignment.TopEnd))
@@ -76,7 +72,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun StateIndicator(modifier: Modifier) {
+    fun NotesStateIndicator(modifier: Modifier) {
         val textStatus by remember {
             textMutableStatus
         }
@@ -88,14 +84,27 @@ class MainActivity : ComponentActivity() {
         Text(text = textStatus, style = TextStyle.Default.copy(color = textStatusColor), modifier = modifier)
     }
 
-    @Composable
-    fun Textarea() {
-        val context = LocalContext.current
-
-        var text by remember {
-            mutableNote
+    private fun updateStatus() {
+        if (notesEditorLogic!!.serverEqual()) {
+            textMutableStatus.value = "A"
+            textMutableStatusColor.value = Color.Green
+        } else {
+            textMutableStatus.value = "W"
+            textMutableStatusColor.value = COLOR_WARNING
         }
+    }
 
+    @Composable
+    fun NotesTextArea() {
+        val context = LocalContext.current
+        var text by remember { mutableStateOf("") }
+        notesEditorLogic = remember {
+            NotesEditorLogic(app, {
+                text = it!!
+            }, {
+                updateStatus()
+            });
+        }
 
         TextField(
             value = text,
@@ -103,7 +112,6 @@ class MainActivity : ComponentActivity() {
             onValueChange = {
                 text = it
                 notesEditorLogic!!.textBoxChanged(it)
-
                 updateStatus()
 
             }, modifier = Modifier
@@ -112,18 +120,6 @@ class MainActivity : ComponentActivity() {
                 .padding(1.dp)
                 .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(8.dp))
         )
-
-
-    }
-
-    private fun updateStatus() {
-        if (notesEditorLogic!!.serverEqual()) {
-            textMutableStatus.value = "A"
-            textMutableStatusColor.value = Color.Green
-        } else {
-            textMutableStatus.value = "W"
-            textMutableStatusColor.value = Color(parseColor("#f59703"))
-        }
     }
 
     @Preview
@@ -136,7 +132,7 @@ class MainActivity : ComponentActivity() {
                 .verticalScroll(ScrollState(0), true)
                 .padding(5.dp)) {
 
-                Textarea()
+                NotesTextArea()
 
                 Button(onClick = {
                     startActivity(Intent(this@MainActivity, ConfigActivity::class.java))
