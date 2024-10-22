@@ -1,10 +1,13 @@
-package com.fazziclay.fclayspyandroid;
+package com.fazziclay.fclayspyandroid.notes;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+
+import com.fazziclay.fclayspyandroid.App;
+import com.fazziclay.fclayspyandroid.notes.api.NoteDto;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -37,12 +40,12 @@ public class NotesEditorLogic {
         this.runnable = () -> {
             interval();
             if (!destroyed) {
-                handler.postDelayed(runnable, 1000);
+                handler.postDelayed(runnable, 500);
             }
         };
 
         handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(runnable, 1000);
+        handler.postDelayed(runnable, 500);
     }
 
     public void destroy() {
@@ -50,8 +53,13 @@ public class NotesEditorLogic {
         handler.removeCallbacks(runnable);
     }
 
-    private void overwriteNoteArea(String text) {
+    private void overwriteNoteArea(NoteDto note) {
+        String text = note.getText();
         Log.d(TAG, "overwriteNoteArea text="+text);
+        if (text == null) {
+            Log.w(TAG, "TEXT IS NULL");
+            return;
+        }
         if (noteTypingLatestKeyup <= syncFromServerAt && !Objects.equals(textFromServer, text)) {
             textBoxText = text;
             consumer.accept(text);
@@ -81,18 +89,18 @@ public class NotesEditorLogic {
     }
 
     private void setNoteFromServer() {
-        app.noteApi.getNotes(app.config.notesToken).enqueue(new Callback<String>() {
+        app.noteApi.getNotes(app.config.notesToken).enqueue(new Callback<NoteDto>() {
             @Override
-            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                String body = response.body();
-                if (body != null) {
+            public void onResponse(@NonNull Call<NoteDto> call, @NonNull Response<NoteDto> response) {
+                NoteDto body = response.body();
+                if (body != null && response.code() == 200) {
                     Log.d(TAG, "setNoteFromServer :: onResponse :: " + body);
                     overwriteNoteArea(body);
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<String> call, @NonNull Throwable throwable) {
+            public void onFailure(@NonNull Call<NoteDto> call, @NonNull Throwable throwable) {
                 throwable.printStackTrace();
             }
         });
@@ -100,19 +108,23 @@ public class NotesEditorLogic {
 
     private void sendNoteAreaToServer() {
         Log.d(TAG, "sendNoteAreaToServer");
-        app.noteApi.setNotes(app.config.notesToken, textBoxText)
-                .enqueue(new Callback<String>() {
+        if (textBoxText == null || textBoxText.length() < 4) {
+            Log.d(TAG, "sendNoteAreaToServer TEXT == NULL OR LEN < 4!!!!!!!!!! RETURN");
+            return;
+        }
+        app.noteApi.setNotes(app.config.notesToken, new NoteDto(textBoxText, null))
+                .enqueue(new Callback<NoteDto>() {
                     @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
-                        String text = response.body();
-                        if (text != null) {
-                            Log.d(TAG, "sendNoteAreaToServer :: onResponse ::" + text);
-                            overwriteNoteArea(text);
+                    public void onResponse(Call<NoteDto> call, Response<NoteDto> response) {
+                        NoteDto note = response.body();
+                        if (note != null && response.code() == 200) {
+                            Log.d(TAG, "sendNoteAreaToServer :: onResponse ::" + note);
+                            overwriteNoteArea(note);
                         }
                     }
 
                     @Override
-                    public void onFailure(Call<String> call, Throwable throwable) {
+                    public void onFailure(Call<NoteDto> call, Throwable throwable) {
                         throwable.printStackTrace();
                     }
                 });
@@ -120,8 +132,12 @@ public class NotesEditorLogic {
     }
 
     public void textBoxChanged(String s) {
-        this.textBoxText = s;
         Log.d(TAG, "note onkeyup");
+        if (s == null) {
+            Log.w(TAG, "note onkeyup: NULL; return");
+            return;
+        }
+        this.textBoxText = s;
         noteTypingLatestKeyup = System.currentTimeMillis();
     }
 }

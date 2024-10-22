@@ -35,7 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fazziclay.fclayspyandroid.App
-import com.fazziclay.fclayspyandroid.NotesEditorLogic
+import com.fazziclay.fclayspyandroid.notes.NotesEditorLogic
 import com.fazziclay.fclayspyandroid.ui.theme.FClaySpyThemeTheme
 
 class MainActivity : ComponentActivity() {

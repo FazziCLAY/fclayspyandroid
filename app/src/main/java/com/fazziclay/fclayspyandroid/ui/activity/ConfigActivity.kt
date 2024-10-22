@@ -80,19 +80,7 @@ class ConfigActivity : ComponentActivity() {
                     })
                 }
 
-                var accessTokenNotes by remember { mutableStateOf(cfg.notesToken) }
-                OutlinedTextField(
-                    value = accessTokenNotes,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(ScrollState(0), true),
-                    onValueChange = {
-                        accessTokenNotes = it
-                        cfg.notesToken = it
-                        app.saveCfg()
-                    },
-                    label = { Text("accessToken for notes") }
-                )
+
 
                 var baseUrlText by remember { mutableStateOf(cfg.baseUrl) }
                 OutlinedTextField(
@@ -108,6 +96,23 @@ class ConfigActivity : ComponentActivity() {
                     label = { Text("baseUrl") }
                 )
 
+
+                var accessTokenNotes by remember { mutableStateOf(cfg.notesToken) }
+                OutlinedTextField(
+                    value = accessTokenNotes,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(ScrollState(0), true),
+                    onValueChange = {
+                        accessTokenNotes = it
+                        cfg.notesToken = it
+                        app.saveCfg()
+                    },
+                    label = { Text("accessToken for notes") }
+                )
+
+
+
                 var accessToken by remember { mutableStateOf(cfg.accessToken) }
                 OutlinedTextField(
                     value = accessToken,
@@ -120,6 +125,20 @@ class ConfigActivity : ComponentActivity() {
                         app.saveCfg()
                     },
                     label = { Text("accessToken") }
+                )
+
+                var personName by remember { mutableStateOf(cfg.personName) }
+                OutlinedTextField(
+                    value = personName,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(ScrollState(0), true),
+                    onValueChange = {
+                        personName = it
+                        cfg.personName = it
+                        app.saveCfg()
+                    },
+                    label = { Text("personName") }
                 )
 
                 var allowedPrograms by remember { mutableStateOf(gson.toJson(cfg.allowedPrograms)) }
@@ -156,10 +175,6 @@ class ConfigActivity : ComponentActivity() {
                     },
                     label = { Text("blackList") }
                 )
-
-
-
-
             }
         }
     }

@@ -5,18 +5,16 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import com.fazziclay.fclaypersonstatusclient.FClayClient
+import com.fazziclay.fclayspyandroid.notes.api.NoteApi
 import com.fazziclay.fclaysystem.personstatus.api.dto.PlaybackDto
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.File
 import java.io.FileReader
 import java.nio.file.Files
 
 class App : Application() {
     private lateinit var netClient: FClayClient
-    internal lateinit var textRetrofit: Retrofit
     internal lateinit var noteApi: NoteApi
     internal lateinit var config: Config
     private var currentSong: AndroidSong? = null
@@ -27,6 +25,7 @@ class App : Application() {
     }
 
     fun delete() {
+        if (config.accessToken.isEmpty()) return
         netClient.delete()
     }
 
@@ -39,10 +38,12 @@ class App : Application() {
      * Check isBlocked and Post song
      */
     private fun postSong(song: PlaybackDto?) {
-        if (isBlocked(song) || !config.enablePostCurrentSong) {
+        if (!config.enablePostCurrentSong || isBlocked(song)) {
             delete()
             return
         }
+
+        if (config.accessToken.isEmpty()) return
         netClient.postSong(song)
     }
 
@@ -58,13 +59,9 @@ class App : Application() {
         config = gson.fromJson(FileReader(file), Config::class.java)
         config.recacheAll()
         try {
-            netClient = FClayClient(config.baseUrl, config.accessToken)
+            netClient = FClayClient(config.baseUrl, config.personName, config.accessToken)
+            noteApi = netClient.retrofit.create(NoteApi::class.java)
 
-            textRetrofit = Retrofit.Builder()
-                .baseUrl(config.baseUrl)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .build()
-            noteApi = textRetrofit.create(NoteApi::class.java)
         } catch (e: Exception) {
             Toast.makeText(this, "Err: $e", Toast.LENGTH_SHORT).show()
         }

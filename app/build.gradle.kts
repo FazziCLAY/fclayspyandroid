@@ -50,8 +50,8 @@ android {
 }
 
 dependencies {
-    implementation(files("../libs/apiclient-1.0.jar"))
-    implementation(files("../libs/api-1.0.jar"))
+    implementation(files("../libs/apiclient-1.2.jar"))
+    implementation(files("../libs/api-1.1.jar"))
 
     //
     compileOnly("org.projectlombok:lombok:1.18.34")
