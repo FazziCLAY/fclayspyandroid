@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun updateStatus() {
-        if (notesEditorLogic!!.serverEqual()) {
+        if (notesEditorLogic?.serverEqual() == true) {
             textMutableStatus.value = "A"
             textMutableStatusColor.value = Color.Green
         } else {

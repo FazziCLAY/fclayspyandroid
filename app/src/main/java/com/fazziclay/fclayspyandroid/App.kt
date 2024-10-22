@@ -14,9 +14,9 @@ import java.io.FileReader
 import java.nio.file.Files
 
 class App : Application() {
-    private lateinit var netClient: FClayClient
-    internal lateinit var noteApi: NoteApi
-    internal lateinit var config: Config
+    public var netClient: FClayClient? = null
+    public var noteApi: NoteApi? = null
+    public lateinit var config: Config
     private var currentSong: AndroidSong? = null
 
     override fun onCreate() {
@@ -26,7 +26,7 @@ class App : Application() {
 
     fun delete() {
         if (config.accessToken.isEmpty()) return
-        netClient.delete()
+        netClient?.delete()
     }
 
     fun setCurrentSong(song: AndroidSong?) {
@@ -44,7 +44,7 @@ class App : Application() {
         }
 
         if (config.accessToken.isEmpty()) return
-        netClient.postSong(song)
+        netClient?.postSong(song)
     }
 
     fun getCfg() = config
@@ -60,7 +60,7 @@ class App : Application() {
         config.recacheAll()
         try {
             netClient = FClayClient(config.baseUrl, config.personName, config.accessToken)
-            noteApi = netClient.retrofit.create(NoteApi::class.java)
+            noteApi = netClient!!.retrofit.create(NoteApi::class.java)
 
         } catch (e: Exception) {
             Toast.makeText(this, "Err: $e", Toast.LENGTH_SHORT).show()

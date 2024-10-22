@@ -89,7 +89,8 @@ public class NotesEditorLogic {
     }
 
     private void setNoteFromServer() {
-        app.noteApi.getNotes(app.config.notesToken).enqueue(new Callback<NoteDto>() {
+        if (app.getNoteApi() == null) return;
+        app.getNoteApi().getNotes(app.config.notesToken).enqueue(new Callback<NoteDto>() {
             @Override
             public void onResponse(@NonNull Call<NoteDto> call, @NonNull Response<NoteDto> response) {
                 NoteDto body = response.body();
@@ -112,7 +113,9 @@ public class NotesEditorLogic {
             Log.d(TAG, "sendNoteAreaToServer TEXT == NULL OR LEN < 4!!!!!!!!!! RETURN");
             return;
         }
-        app.noteApi.setNotes(app.config.notesToken, new NoteDto(textBoxText, null))
+
+        if (app.getNoteApi() == null) return;
+        app.getNoteApi().setNotes(app.config.notesToken, new NoteDto(textBoxText, null))
                 .enqueue(new Callback<NoteDto>() {
                     @Override
                     public void onResponse(Call<NoteDto> call, Response<NoteDto> response) {
